@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#f2f5fa" />
+<meta name="description" content="指尖修行 · 打字闯关道场：19 关从零基础到盲打，含英文美文、语文短文、代码练习、小鹤双拼、可视化键盘与实时速度曲线。" />
+<title>指尖修行 · 打字闯关道场</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand" id="brand-home">
+    <div class="brand-mark">⌨</div>
+    <div class="brand-text">
+      <strong>指尖修行</strong>
+      <span>打字闯关道场 · 零基础到盲打</span>
+    </div>
+  </div>
+
+  <nav class="mainnav">
+    <button class="navbtn is-active" data-nav="map">关卡地图</button>
+    <button class="navbtn" data-nav="custom">自定义练习</button>
+    <button class="navbtn" data-nav="learn">学习板块</button>
+    <button class="navbtn" data-nav="stats">成绩统计</button>
+  </nav>
+
+  <div class="topbar-right">
+    <div class="hud">
+      <div class="hud-item"><span class="hud-k">总星数</span><span class="hud-v" id="hud-stars">0</span></div>
+      <div class="hud-item"><span class="hud-k">最高分</span><span class="hud-v" id="hud-score">0</span></div>
+      <div class="hud-item"><span class="hud-k">通关</span><span class="hud-v" id="hud-clear">0/19</span></div>
+      <div class="hud-item"><span class="hud-k">连续打卡</span><span class="hud-v" id="hud-streak">0 天</span></div>
+    </div>
+    <button class="iconbtn" id="btn-help" title="使用说明" aria-label="使用说明">?</button>
+    <button class="iconbtn" id="btn-settings" title="设置" aria-label="打开设置" aria-expanded="false" aria-controls="settings-panel">设置</button>
+  </div>
+</header>
+
+<!-- 设置面板 -->
+<div class="settings-panel" id="settings-panel" role="dialog" aria-label="设置">
+  <div class="sp-head">
+    <b>设置</b>
+    <button class="sp-close" id="sp-close" aria-label="关闭设置">×</button>
+  </div>
+  <div class="sp-body">
+    <div class="sp-row">
+      <span class="sp-label">主题</span>
+      <div class="seg" id="seg-theme" role="group" aria-label="主题">
+        <button data-v="light">浅色</button>
+        <button data-v="dark">深色</button>
+        <button data-v="auto">跟随系统</button>
+      </div>
+    </div>
+
+    <div class="sp-row">
+      <span class="sp-label">界面字号</span>
+      <div class="seg" id="seg-fs" role="group" aria-label="界面字号">
+        <button data-v="sm">小</button>
+        <button data-v="md">中</button>
+        <button data-v="lg">大</button>
+        <button data-v="xl">特大</button>
+      </div>
+    </div>
+
+    <div class="sp-row">
+      <span class="sp-label">动画效果</span>
+      <div class="seg" id="seg-motion" role="group" aria-label="动画效果">
+        <button data-v="on">开启</button>
+        <button data-v="off">关闭</button>
+      </div>
+    </div>
+
+    <div class="sp-row">
+      <span class="sp-label">音效</span>
+      <label class="mini-switch">
+        <input type="checkbox" id="sp-sound" /><i></i><span id="sp-sound-txt">开启</span>
+      </label>
+    </div>
+
+    <div class="sp-row" id="sp-row-kb">
+      <span class="sp-label">虚拟键盘</span>
+      <label class="mini-switch">
+        <input type="checkbox" id="sp-keyboard" /><i></i><span id="sp-keyboard-txt">显示</span>
+      </label>
+    </div>
+
+    <div class="sp-row sp-col">
+      <span class="sp-label">数据</span>
+      <div class="sp-btns">
+        <button class="btn ghost small" id="btn-export-data">导出备份</button>
+        <button class="btn ghost small" id="btn-import-data">导入备份</button>
+        <button class="btn ghost small danger" id="btn-reset">清空进度</button>
+      </div>
+      <p class="sp-note" id="sp-storage-note"></p>
+    </div>
+  </div>
+</div>
+<div class="settings-mask" id="settings-mask"></div>
+<input type="file" id="import-file" accept="application/json,.json" hidden />
+
+<!-- 新手引导 -->
+<div class="modal" id="onboard-modal" role="dialog" aria-label="使用说明">
+  <div class="modal-card ob-card">
+    <div class="ob-body" id="ob-body"></div>
+    <div class="ob-dots" id="ob-dots"></div>
+    <div class="modal-actions">
+      <button class="btn ghost" id="ob-skip">跳过</button>
+      <button class="btn ghost" id="ob-prev">上一步</button>
+      <button class="btn primary" id="ob-next">下一步</button>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <!-- ===================== 关卡地图 ===================== -->
+  <section class="view is-active" id="view-map">
+    <div class="hero">
+      <div class="hero-left">
+        <h1>今天，从一根手指开始。</h1>
+        <p>19 个关卡，五个章节。先认识键盘，再打出单词，然后读英文美文、写中文小记，最后练程序员的符号手速。每一关都有实时速度曲线、可视化键盘和手指标示——不用低头看键盘。</p>
+        <div class="hero-tags">
+          <span>零基础友好</span><span>实时速度曲线</span><span>可视化键盘</span>
+          <span>手指分工提示</span><span>英文 · 语文 · 代码</span><span>星级评分</span>
+        </div>
+      </div>
+      <div class="hero-right">
+        <label class="switch">
+          <input type="checkbox" id="toggle-free" />
+          <span class="switch-track"><i></i></span>
+          <span class="switch-label">自由模式（解锁全部关卡）</span>
+        </label>
+        <div class="hero-note">建议使用电脑 + 实体键盘，手机和平板无法正常练习。</div>
+      </div>
+    </div>
+
+    <div class="daily-card" id="daily-card">
+      <div class="dc-left">
+        <div class="dc-badge">每日一练</div>
+        <div class="dc-title" id="dc-title">今日挑战</div>
+        <div class="dc-meta" id="dc-meta">加载中…</div>
+      </div>
+      <div class="dc-preview" id="dc-preview"></div>
+      <div class="dc-right">
+        <div class="dc-streak"><b id="dc-streak">0</b><span>连续打卡（天）</span></div>
+        <button class="btn primary" id="dc-start">开始今日挑战</button>
+      </div>
+    </div>
+
+    <div class="tool-row">
+      <button class="tool-tile" id="tile-placement">
+        <div class="tt-head"><span class="tt-badge">定级</span><b>水平测试</b></div>
+        <p>60 秒测出你的真实速度，自动算出适合你的目标速度</p>
+        <div class="tt-foot" id="tt-place-foot">还没测过 · 点这里开始</div>
+      </button>
+
+      <button class="tool-tile" id="tile-weak">
+        <div class="tt-head"><span class="tt-badge">智能</span><b>弱键特训</b></div>
+        <p>分析你每个键的速度和正确率，针对性生成强化练习</p>
+        <div class="tt-foot" id="tt-weak-foot">样本不足</div>
+      </button>
+
+      <div class="tool-tile is-static">
+        <div class="tt-head"><span class="tt-badge">目标</span><b>目标式练习</b></div>
+        <p>用你的水平定制目标速度，通关后还可以再提升一档</p>
+        <label class="mini-switch"><input type="checkbox" id="toggle-target" /><i></i><span id="target-label">按关卡默认目标</span></label>
+      </div>
+    </div>
+
+    <div id="chapters"></div>
+  </section>
+
+  <!-- ===================== 练习界面 ===================== -->
+  <section class="view" id="view-practice">
+    <div class="practice-head">
+      <button class="btn ghost" id="btn-back">← 返回地图</button>
+      <div class="ph-center">
+        <div class="ph-title" id="p-name">关卡</div>
+        <div class="ph-sub" id="p-sub"></div>
+      </div>
+      <div class="ph-right">
+        <div class="chip"><b id="p-timer">0:00</b><span>用时</span></div>
+        <button class="btn ghost small" id="btn-pause">暂停</button>
+        <button class="btn ghost small" id="btn-restart">重来</button>
+      </div>
+    </div>
+
+    <div class="progress-track" role="progressbar" aria-label="本关进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="p-progress-bar"><div class="progress-fill" id="p-progress"></div></div>
+
+    <div class="tipbar" id="p-tip"></div>
+
+    <div class="text-card">
+      <div class="text-display" id="text-display" aria-label="练习文本"></div>
+      <button class="tap-hint" id="tap-hint" type="button">点这里开始输入</button>
+    </div>
+
+    <div class="touch-bar" id="touch-bar">
+      <button class="btn ghost small" id="btn-touch-back">回退一格</button>
+      <button class="btn ghost small" id="btn-touch-kb">显示键盘图</button>
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><b id="m-cpm">0</b><span>字 / 分</span></div>
+      <div class="metric"><b id="m-wpm">0</b><span>词 / 分</span></div>
+      <div class="metric"><b id="m-acc">100%</b><span>正确率</span></div>
+      <div class="metric"><b id="m-combo">0</b><span>当前连击</span></div>
+      <div class="metric"><b id="m-err">0</b><span>错误数</span></div>
+      <div class="metric"><b id="m-target">—</b><span>三星目标</span></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-head">
+        <span>实时速度曲线</span>
+        <span class="muted">纵轴：字 / 分　横轴：最近 20 秒</span>
+      </div>
+      <canvas id="speed-chart"></canvas>
+    </div>
+
+    <div class="kb-card">
+      <div class="kb-head">
+        <span>可视化键盘</span>
+        <div class="kb-tools">
+          <label class="mini-switch"><input type="checkbox" id="toggle-hand" checked /><i></i><span>手指指示</span></label>
+          <label class="mini-switch" title="隐藏键帽上的字母，只看手指配色和高亮，逼自己记位置"><input type="checkbox" id="toggle-blind" /><i></i><span>盲打模式</span></label>
+          <label class="mini-switch"><input type="checkbox" id="toggle-metro" /><i></i><span>节拍器</span></label>
+          <div class="bpm" id="bpm-box">
+            <button class="bpm-btn" id="bpm-down">−</button>
+            <b id="bpm-val">120</b>
+            <span>BPM</span>
+            <button class="bpm-btn" id="bpm-up">+</button>
+          </div>
+          <label class="mini-field">
+            <span>输入方案</span>
+            <select id="scheme">
+              <option value="quanpin">全拼</option>
+              <option value="xiaohe">小鹤双拼</option>
+            </select>
+          </label>
+          <span class="kb-legend">
+            <i class="lg f-l5"></i>小指<i class="lg f-l4"></i>无名指<i class="lg f-l3"></i>中指
+            <i class="lg f-l2"></i>食指<i class="lg f-r2"></i>食指<i class="lg f-r3"></i>中指
+            <i class="lg f-r4"></i>无名指<i class="lg f-r5"></i>小指<i class="lg f-thumb"></i>拇指
+          </span>
+        </div>
+      </div>
+      <div class="keyboard" id="keyboard" aria-hidden="true"></div>
+      <div class="kb-note" id="kb-note">
+        <b>模拟键盘已开启</b>：可以直接用鼠标或手指点键帽输入。点 <span class="kbd-inline">Shift</span> 会锁定大写，再点一次取消。
+      </div>
+      <div class="blind-note" id="blind-note">
+        盲打模式 · 键帽字母已隐藏，只看手指配色和蓝色高亮找位置。鼠标悬停可临时偷看。
+      </div>
+
+      <div class="hands" id="hands" aria-hidden="true">
+        <div class="hand-wrap">
+          <div class="hand-label">左手</div>
+          <div class="hand-group" id="hand-left">
+            <div class="finger" data-f="l5"><i></i><span>小指</span></div>
+            <div class="finger" data-f="l4"><i></i><span>无名</span></div>
+            <div class="finger" data-f="l3"><i></i><span>中指</span></div>
+            <div class="finger" data-f="l2"><i></i><span>食指</span></div>
+            <div class="finger" data-f="thumb"><i></i><span>拇指</span></div>
+          </div>
+        </div>
+        <div class="hand-wrap">
+          <div class="hand-label">右手</div>
+          <div class="hand-group right" id="hand-right">
+            <div class="finger" data-f="thumb"><i></i><span>拇指</span></div>
+            <div class="finger" data-f="r2"><i></i><span>食指</span></div>
+            <div class="finger" data-f="r3"><i></i><span>中指</span></div>
+            <div class="finger" data-f="r4"><i></i><span>无名</span></div>
+            <div class="finger" data-f="r5"><i></i><span>小指</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="kb-foot">
+        <div class="live-speed">
+          <div class="ls-main"><b id="ls-cpm">0</b><span>字 / 分</span></div>
+          <div class="ls-sub">实时敲击速度（最近 5 秒滑动窗口）</div>
+          <div class="ls-bar"><i id="ls-bar"></i></div>
+          <div class="ls-sub2">本关平均 <b id="ls-avg">0</b> 字/分　·　峰值 <b id="ls-peak">0</b> 字/分</div>
+          <div class="beat" id="beat"><i></i><span>节拍器已关闭</span></div>
+        </div>
+        <div class="next-key">
+          <div class="nk-label">下一个要敲的键</div>
+          <div class="nk-key" id="nk-key">—</div>
+          <div class="nk-finger" id="nk-finger">开始输入即可计时</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 学习板块 ===================== -->
+  <section class="view" id="view-learn">
+    <div class="learn-head">
+      <h1>学习板块</h1>
+      <p>不着急练速度，先把「怎么敲」搞清楚。看完这五页，你的速度会自然涨上来。</p>
+    </div>
+
+    <div class="tabs" id="learn-tabs">
+      <button class="tab is-active" data-tab="t1">01 坐姿与手型</button>
+      <button class="tab" data-tab="t2">02 指法分区</button>
+      <button class="tab" data-tab="t3">03 中文输入法</button>
+      <button class="tab" data-tab="t4">04 代码符号速查</button>
+      <button class="tab" data-tab="t5">05 提速心法</button>
+    </div>
+
+    <div class="tabpanes">
+      <!-- 01 -->
+      <div class="tabpane is-active" id="t1">
+        <div class="cards-2">
+          <div class="info-card">
+            <h3>身体姿势</h3>
+            <ul class="dotlist">
+              <li><b>坐直，不要瘫。</b>背部贴着椅背，肩膀自然下沉，不要耸肩。</li>
+              <li><b>手肘约 90 度。</b>手腕悬空或轻搭在腕托上，绝不要把整个手掌压在桌面上。</li>
+              <li><b>屏幕与视线齐平。</b>眼睛平视屏幕上方三分之一处，脖子不要前伸。</li>
+              <li><b>手腕保持一条直线。</b>不要向上翘（会压迫腕管），也不要向内折。</li>
+              <li><b>每 20 分钟活动一次手指和手腕</b>，握拳、张开，各做 10 次。</li>
+            </ul>
+          </div>
+          <div class="info-card">
+            <h3>手型要点</h3>
+            <ul class="dotlist">
+              <li><b>手指自然弯曲成弧形</b>，像握着一个鸡蛋，指肚（不是指尖）落在键帽中央。</li>
+              <li><b>左手食指放 F，右手食指放 J。</b>这两个键帽上有凸起的小横杠，是你的「盲打锚点」。</li>
+              <li><b>每次敲完一个键，立刻回到基准键位</b>，这叫归位。手指走最短的路，效率最高。</li>
+              <li><b>按键要轻。</b>机械键盘只需轻轻触发，用力砸键反而更慢、更累。</li>
+              <li><b>大拇指只管空格</b>，两只手的大拇指都可以，习惯哪只就固定用哪只。</li>
+            </ul>
+          </div>
+        </div>
+        <div class="info-card wide">
+          <h3>基准键位图</h3>
+          <p class="muted">下面这八个键是所有动作的「家」。每一次击键结束后，手指都要回到这里。</p>
+          <div class="homekeys">
+            <div class="hk"><b>A</b><span>左手小指</span></div>
+            <div class="hk"><b>S</b><span>左手无名指</span></div>
+            <div class="hk"><b>D</b><span>左手中指</span></div>
+            <div class="hk focus"><b>F</b><span>左手食指 · 有凸起</span></div>
+            <div class="hk focus"><b>J</b><span>右手食指 · 有凸起</span></div>
+            <div class="hk"><b>K</b><span>右手中指</span></div>
+            <div class="hk"><b>L</b><span>右手无名指</span></div>
+            <div class="hk"><b>;</b><span>右手小指</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 02 -->
+      <div class="tabpane" id="t2">
+        <div class="info-card wide">
+          <h3>每个手指负责哪些键</h3>
+          <p class="muted">颜色 = 手指。练习时键盘上会同步高亮，跟着颜色走就不会乱。</p>
+          <div class="keyboard" id="learn-keyboard"></div>
+          <div class="finger-table">
+            <div class="ft-row"><i class="lg f-l5"></i><b>左手小指</b><span>` 1 Q A Z　以及左 Shift、Tab、Caps</span></div>
+            <div class="ft-row"><i class="lg f-l4"></i><b>左手无名指</b><span>2 W S X</span></div>
+            <div class="ft-row"><i class="lg f-l3"></i><b>左手中指</b><span>3 E D C</span></div>
+            <div class="ft-row"><i class="lg f-l2"></i><b>左手食指</b><span>4 5 R T F G V B　（负责两列）</span></div>
+            <div class="ft-row"><i class="lg f-r2"></i><b>右手食指</b><span>6 7 Y U H J N M　（负责两列）</span></div>
+            <div class="ft-row"><i class="lg f-r3"></i><b>右手中指</b><span>8 I K ,</span></div>
+            <div class="ft-row"><i class="lg f-r4"></i><b>右手无名指</b><span>9 O L .</span></div>
+            <div class="ft-row"><i class="lg f-r5"></i><b>右手小指</b><span>0 - = P [ ] \ ; ' /　以及右 Shift、Enter、Backspace</span></div>
+            <div class="ft-row"><i class="lg f-thumb"></i><b>大拇指</b><span>空格</span></div>
+          </div>
+        </div>
+        <div class="info-card wide">
+          <h3>Shift 的左右分工（重点）</h3>
+          <p class="muted">打大写字母和上排符号时，Shift 必须用「另一只手」的那个。</p>
+          <div class="cards-2">
+            <div class="mini-card"><b>左手区的键 → 用右 Shift</b><span>例如大写 A：右小指按住 Shift，左小指敲 A。这样左手不用离开基准位。</span></div>
+            <div class="mini-card"><b>右手区的键 → 用左 Shift</b><span>例如冒号 : ：左小指按住 Shift，右小指敲 ; 。</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 03 -->
+      <div class="tabpane" id="t3">
+        <div class="cards-2">
+          <div class="info-card">
+            <h3>拼音输入法核心技巧</h3>
+            <ul class="dotlist">
+              <li><b>按「词」打，不要按「字」打。</b>打 <code>xueerbuyan</code> 一次出「学而不厌」，比拼四个单字快好几倍。</li>
+              <li><b>用简拼提速。</b>输入每个字的声母，例如 <code>zhrmghg</code> → 中华人民共和国。</li>
+              <li><b>善用首字母 + 数字选词。</b>候选框里第 1 个词直接按空格，第 2、3 个按数字键 2、3。</li>
+              <li><b>翻页用 - 和 =</b>（或 , 和 .）。不要用鼠标去点候选词。</li>
+              <li><b>不要打完一个字就急着选。</b>连续输入一整个短语，让输入法自己组词，准确率更高。</li>
+              <li><b>u 模式输入生僻字：</b>先打 u，再打字的部首拼音，例如 u + shui + shui → 淼。</li>
+            </ul>
+          </div>
+          <div class="info-card">
+            <h3>中文标点对照</h3>
+            <table class="sym-table">
+              <thead><tr><th>中文标点</th><th>按键</th></tr></thead>
+              <tbody>
+                <tr><td>，逗号</td><td><kbd>,</kbd></td></tr>
+                <tr><td>。句号</td><td><kbd>.</kbd></td></tr>
+                <tr><td>、顿号</td><td><kbd>\</kbd></td></tr>
+                <tr><td>？问号</td><td><kbd>/</kbd></td></tr>
+                <tr><td>！叹号</td><td><kbd>1</kbd>（Shift 状态）</td></tr>
+                <tr><td>：冒号</td><td><kbd>;</kbd></td></tr>
+                <tr><td>「」引号</td><td><kbd>[</kbd> / <kbd>]</kbd></td></tr>
+                <tr><td>《》书名号</td><td><kbd>Shift</kbd> + <kbd>,</kbd> / <kbd>.</kbd></td></tr>
+              </tbody>
+            </table>
+            <p class="muted small-note">以上为中文标点模式下的默认键位，不同输入法可能略有差异。</p>
+          </div>
+        </div>
+
+        <div class="info-card wide">
+          <h3>双拼 · 把每个音节压成两键</h3>
+          <p class="muted">全拼打「双」要按 shuang 六个键；双拼只要两键。本站内置<b>小鹤双拼</b>方案——在练习页把「输入方案」切成小鹤双拼，键盘就会直接提示该按哪两个键。</p>
+          <div class="cards-2">
+            <div class="mini-card">
+              <b>规则只有两条</b>
+              <span>① 声母按原键位打，只有 zh / ch / sh 分别换到 V / I / U。<br>② 韵母按下面这张表换成对应的一个键。<br>所以「双」= u + l = <code>ul</code>。</span>
+            </div>
+            <div class="mini-card">
+              <b>零声母怎么打</b>
+              <span>a、o、e 开头的音节（如 an、er、ou）直接照原样打，不用转换。<br>yu 系列按 ü 处理：yu → yv，yue → yt，yuan → yr，yun → yy。</span>
+            </div>
+          </div>
+          <h4 class="sp-h4">韵母键位表（小鹤双拼）</h4>
+          <div id="sp-init"></div>
+          <div class="sp-table" id="sp-table"></div>
+          <p class="muted small-note">刚开始会很别扭，这是正常的——你的手指要重学一遍韵母。建议先在「训练方案库 → 双拼入门」里练熟，再回到第四章打成语和短文。</p>
+        </div>
+      </div>
+
+      <!-- 04 -->
+      <div class="tabpane" id="t4">
+        <div class="info-card wide">
+          <h3>程序员符号速查表</h3>
+          <p class="muted">写代码时，符号比字母还多。先把这张表过一遍，再去第五章实战。</p>
+          <div class="sym-grid" id="sym-grid"></div>
+        </div>
+      </div>
+
+      <!-- 05 -->
+      <div class="tabpane" id="t5">
+        <div class="cards-2">
+          <div class="info-card">
+            <h3>五个提速原则</h3>
+            <ul class="dotlist">
+              <li><b>先求准，再求快。</b>准确率 98% 的人，最终一定比准确率 85% 的人快——因为后者一直在按退格键。</li>
+              <li><b>保持均匀节奏。</b>像节拍器一样「哒-哒-哒」。忽快忽慢最耗体力，也最容易错。</li>
+              <li><b>眼睛只看屏幕。</b>低头看键盘的那一秒，就是你速度的上限。</li>
+              <li><b>用节拍练习。</b>找一个你能 100% 正确的速度，练 3 分钟，再提高 5%。</li>
+              <li><b>每天 15 分钟，胜过周末 2 小时。</b>肌肉记忆靠高频重复，不靠单次时长。</li>
+            </ul>
+          </div>
+          <div class="info-card">
+            <h3>常见错误自查</h3>
+            <ul class="dotlist">
+              <li><b>手指飞离基准键位 →</b> 打字前先摸一下 F 和 J 的凸起。</li>
+              <li><b>用错手指代打 →</b> 短期看起来快，长期会卡在瓶颈。回到第二章重新练。</li>
+              <li><b>手腕压在桌上 →</b> 会影响小指和无名指的灵活性，还容易受伤。</li>
+              <li><b>一直按着 Shift 不放 →</b> 打完立刻松开，否则后面全是错的。</li>
+              <li><b>追求极限速度 →</b> 速度是准确率的副产品，把注意力放在「打对」上。</li>
+            </ul>
+          </div>
+        </div>
+        <div class="info-card wide">
+          <h3>给自己的进阶路线</h3>
+          <div class="roadmap">
+            <div class="rm"><b>第 1 周</b><span>第一章 5 关，每天 15 分钟。目标：不看键盘能找到所有字母键。</span></div>
+            <div class="rm"><b>第 2 周</b><span>第二章 + 第三章，练英文单词和句子。目标：英文 120 字/分，正确率 95%。</span></div>
+            <div class="rm"><b>第 3 周</b><span>第四章中文 + 第五章代码。目标：中文 60 字/分，符号盲打。</span></div>
+            <div class="rm"><b>之后</b><span>每天刷一遍三星，追求 200 字/分。此时打字已经不需要「想」了。</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== 自定义练习 ===================== -->
+  <section class="view" id="view-custom">
+    <div class="learn-head">
+      <h1>自定义练习</h1>
+      <p>把你手头正在读的文章、要背的课文、正在写的代码粘进来，直接开练。中文会自动切换成拼音提示模式。</p>
+    </div>
+
+    <div class="custom-grid">
+      <div class="info-card">
+        <h3>粘贴你的文本</h3>
+        <textarea id="custom-text" class="custom-area" spellcheck="false"
+          placeholder="在这里粘贴或输入任意文本……&#10;&#10;例如：&#10;  · 一段英文文章&#10;  · 一首古诗、一段课文&#10;  · 一段你正在调试的代码"></textarea>
+
+        <div class="custom-row">
+          <label class="field">
+            <span>文本类型</span>
+            <select id="custom-kind">
+              <option value="auto">自动识别</option>
+              <option value="text">英文 / 数字</option>
+              <option value="zh">中文（拼音提示）</option>
+              <option value="code">代码</option>
+            </select>
+          </label>
+          <label class="field">
+            <span>目标速度 <b id="custom-target-val">120</b> 字/分</span>
+            <input type="range" id="custom-target" min="30" max="300" step="5" value="120" />
+          </label>
+        </div>
+
+        <div class="custom-actions">
+          <button class="btn primary" id="custom-start">开始练习</button>
+          <button class="btn ghost" id="custom-sample">来一段示例</button>
+          <button class="btn ghost" id="custom-clear">清空</button>
+        </div>
+        <p class="muted small-note" id="custom-hint">提示：中文文本建议切换到拼音输入法；代码文本支持回车换行。</p>
+      </div>
+
+      <div class="info-card">
+        <h3>常用素材</h3>
+        <p class="muted">点一下直接填入，省得复制粘贴。</p>
+        <div class="snippet-list" id="snippet-list"></div>
+      </div>
+    </div>
+
+    <div class="info-card wide">
+      <h3>训练方案库</h3>
+      <p class="muted">预置训练包，点一下立刻开练。中文包会自动带拼音提示，切到双拼方案还能练双拼键位。</p>
+      <div class="pack-grid" id="pack-grid"></div>
+    </div>
+  </section>
+
+  <!-- ===================== 成绩统计 ===================== -->
+  <section class="view" id="view-stats">
+    <div class="learn-head">
+      <h1>成绩统计</h1>
+      <p>你练了多少、快了多少、哪些键还在拖后腿——都在这里。</p>
+    </div>
+
+    <div class="stat-cards">
+      <div class="stat-card"><span>累计练习时长</span><b id="st-time">0 分钟</b><i id="st-sessions">0 次练习</i></div>
+      <div class="stat-card"><span>累计击键</span><b id="st-keys">0</b><i id="st-acc">平均正确率 100%</i></div>
+      <div class="stat-card"><span>历史最快</span><b id="st-best">0 字/分</b><i id="st-avg">平均 0 字/分</i></div>
+      <div class="stat-card"><span>最高连击</span><b id="st-combo">0</b><i id="st-perfect">零失误通关 0 次</i></div>
+    </div>
+
+    <div class="cards-2">
+      <div class="info-card">
+        <h3>速度趋势</h3>
+        <p class="muted">最近 30 次练习的字/分</p>
+        <canvas class="stat-canvas" id="chart-cpm"></canvas>
+      </div>
+      <div class="info-card">
+        <h3>正确率趋势</h3>
+        <p class="muted">最近 30 次练习的正确率</p>
+        <canvas class="stat-canvas" id="chart-acc"></canvas>
+      </div>
+    </div>
+
+    <div class="info-card wide">
+      <h3>章节进度</h3>
+      <div class="chapter-progress" id="chapter-progress"></div>
+    </div>
+
+    <div class="info-card wide">
+      <h3>击键热力图 · 哪些键最慢</h3>
+      <p class="muted">颜色越深代表这个键的表现越差。灰白色表示样本不足。</p>
+      <div class="heat-switch">
+        <button class="hsw is-active" data-heat="lat">按击键间隔</button>
+        <button class="hsw" data-heat="err">按错误率</button>
+      </div>
+      <div class="keyboard heat" id="heat-keyboard"></div>
+      <div class="heat-legend">
+        <span>好</span><i></i><span>差</span>
+        <b id="heat-slowest"></b>
+      </div>
+    </div>
+
+    <div class="info-card wide">
+      <h3>成就墙 <span class="ach-count" id="ach-count">0 / 0</span></h3>
+      <div class="ach-grid" id="ach-grid"></div>
+    </div>
+
+    <div class="info-card wide">
+      <h3>练习记录 <span class="muted" id="hist-count"></span></h3>
+      <div class="hist-wrap">
+        <table class="hist-table">
+          <thead><tr><th>时间</th><th>关卡</th><th>速度</th><th>正确率</th><th>得分</th><th>星级</th></tr></thead>
+          <tbody id="hist-body"></tbody>
+        </table>
+      </div>
+      <div class="hist-actions">
+        <button class="btn ghost small" id="btn-export">导出成绩（CSV）</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <span>指尖修行 · 打字闯关道场</span>
+  <span>所有数据保存在你的浏览器本地（localStorage），不会上传。</span>
+</footer>
+
+<!-- 结算弹窗 -->
+<div class="modal" id="result-modal">
+  <div class="modal-card">
+    <div class="modal-stars" id="r-stars"></div>
+    <h2 id="r-title">通关！</h2>
+    <p class="modal-sub" id="r-sub"></p>
+
+    <div class="place-box" id="r-place-box">
+      <div class="pb-level"><span>你的水平</span><b id="r-place-level">—</b></div>
+      <div class="pb-target">
+        <span>建议目标速度</span>
+        <b id="r-place-target">0</b>
+        <em>字 / 分</em>
+      </div>
+      <p class="pb-note" id="r-place-note"></p>
+    </div>
+
+    <div class="result-score">
+      <span class="rs-label">本关得分</span>
+      <b id="r-score">0</b>
+    </div>
+
+    <div class="result-grid">
+      <div><b id="r-cpm">0</b><span>字 / 分</span></div>
+      <div><b id="r-acc">0%</b><span>正确率</span></div>
+      <div><b id="r-time">0:00</b><span>用时</span></div>
+      <div><b id="r-combo">0</b><span>最高连击</span></div>
+      <div><b id="r-err">0</b><span>错误数</span></div>
+      <div><b id="r-best">—</b><span>历史最佳</span></div>
+    </div>
+
+    <div class="result-extra">
+      <div class="re-title">本关最慢的三个键</div>
+      <div class="slow-keys" id="r-slow"></div>
+      <div class="ach-toast" id="r-ach"></div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn ghost" id="r-again">再来一次</button>
+      <button class="btn ghost" id="r-map">返回地图</button>
+      <button class="btn primary" id="r-next">下一关 →</button>
+      <button class="btn primary" id="r-apply" style="display:none">应用为目标速度</button>
+    </div>
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<textarea id="hidden-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-hidden="true"></textarea>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
