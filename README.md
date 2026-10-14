@@ -4,6 +4,12 @@
 
 纯静态：`HTML + CSS + 原生 JS`，没有构建步骤，没有 npm 依赖。双击 `index.html` 就能跑。
 
+## 在线访问
+
+**👉 https://system0928.github.io/typing-dojo/**
+
+直接用浏览器打开就能练，手机上也能用。成绩保存在你自己的浏览器里，不会上传。
+
 ## 功能
 
 | 模块 | 说明 |
@@ -48,20 +54,35 @@ python -m http.server 8899 --bind 127.0.0.1
 npx serve .
 ```
 
-## 部署到 GitHub Pages
+## 部署状态
 
-### 方式一：GitHub Actions（推荐，自动部署）
+本站**已部署**，由 `.github/workflows/deploy-pages.yml` 自动发布：
 
-1. 新建一个 GitHub 仓库，把本项目推上去（默认分支 `main`）
-2. 仓库 **Settings → Pages → Build and deployment → Source** 选 **GitHub Actions**
-3. 推送后 `.github/workflows/deploy-pages.yml` 会自动运行，几分钟后访问
-   `https://<你的用户名>.github.io/<仓库名>/`
+| | |
+|---|---|
+| 线上地址 | https://system0928.github.io/typing-dojo/ |
+| 部署方式 | GitHub Actions（`main` 分支推送即触发） |
+| 运行记录 | https://github.com/System0928/typing-dojo/actions |
 
-### 方式二：直接发布分支（零配置）
+### 日常更新
 
-1. 推到 GitHub 后进入 **Settings → Pages**
-2. **Source** 选 **Deploy from a branch**，分支选 `main`，目录选 `/ (root)`
-3. 保存后等一两分钟即可
+改完代码后推送即可，工作流会自动重新部署：
+
+```bash
+git add -A
+git commit -m "描述你的改动"
+git push
+```
+
+### 如果要部署到自己的仓库
+
+1. Fork 或新建仓库，把本项目推上去（默认分支 `main`）
+2. 工作流需要 Pages 已开启。`actions/configure-pages` 的 `enablement: true` **并不总能自动开通**，
+   最稳的做法是手动开一次：**Settings → Pages → Source 选 GitHub Actions**
+   （或用 API：`POST /repos/{owner}/{repo}/pages`，body `{"build_type":"workflow"}`）
+3. 之后每次推送都会自动部署到 `https://<用户名>.github.io/<仓库名>/`
+
+> 注意：GitHub Pages 免费版要求仓库**公开**。
 
 ## 目录结构
 
